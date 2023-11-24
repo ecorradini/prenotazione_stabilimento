@@ -1,0 +1,23 @@
+Ombrellone 1
+Ombrellone 2
+Ombrellone 3
+Ombrellone 4
+Ombrellone 5
+Ombrellone 6
+Ombrellone 7
+Ombrellone 8
+###
+Cabina #1
+Cabina #2
+Cabina #3
+Cabina #4
+###
+Sdraio 1
+Sdraio 2
+Sdraio 3
+Sdraio 4
+Sdraio 5
+###
+Pedalò rosso
+Pedalò blu
+Pedalò verde

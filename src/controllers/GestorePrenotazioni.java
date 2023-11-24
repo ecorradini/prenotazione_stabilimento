@@ -4,11 +4,15 @@ import entities.*;
 import interfaces.Prenotabile;
 import interfaces.PrenotabileConSlot;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Scanner;
 import java.util.Set;
 
 public class GestorePrenotazioni {
@@ -17,17 +21,38 @@ public class GestorePrenotazioni {
     public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     public static final DateTimeFormatter HOUR_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
+    private static <T extends Servizio> T[] splitSezione(Class<T> tipoServizio, String sezione) {
+        String[] nomi = sezione.split("\n");
+        Servizio[] result = new Servizio[nomi.length];
+        for(int i = 0; i<nomi.length; i++) {
+            if(!nomi[i].isEmpty()) {
+                try {
+                    T corrente = tipoServizio.getConstructor(String.class).newInstance(nomi[i]);
+                    result[i] = corrente;
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        return Arrays.stream(result).toArray(size -> (T[]) Array.newInstance(tipoServizio, size));
+    }
+
     public static void init() {
-        serviziPrenotabili.add(new Ombrellone("Ombrellone 1"));
-        serviziPrenotabili.add(new Ombrellone("Ombrellone 2"));
-        serviziPrenotabili.add(new Ombrellone("Ombrellone 3"));
-        serviziPrenotabili.add(new Sdraio("Sdraio 1"));
-        serviziPrenotabili.add(new Sdraio("Sdraio 2"));
-        serviziPrenotabili.add(new Sdraio("Sdraio 3"));
-        serviziPrenotabili.add(new Pedalo("Pedalò blu"));
-        serviziPrenotabili.add(new Pedalo("Pedalò rosso"));
-        serviziPrenotabili.add(new Cabina("Cabina #1"));
-        serviziPrenotabili.add(new Cabina("Cabina #2"));
+        try {
+            Scanner fileInput = new Scanner(new FileInputStream("servizi.txt"));
+            fileInput.useDelimiter("###");
+            String[] sezioni = new String[4];
+            int i = 0;
+            while(fileInput.hasNext()) {
+                sezioni[i] = fileInput.next();
+                i++;
+            }
+            serviziPrenotabili.addAll(Arrays.stream(splitSezione(Ombrellone.class, sezioni[0])).toList());
+            serviziPrenotabili.addAll(Arrays.stream(splitSezione(Cabina.class, sezioni[1])).toList());
+            serviziPrenotabili.addAll(Arrays.stream(splitSezione(Sdraio.class, sezioni[2])).toList());
+            serviziPrenotabili.addAll(Arrays.stream(splitSezione(Pedalo.class, sezioni[3])).toList());
+        } catch(FileNotFoundException e) {
+            System.out.println("Non ho trovato il file di dati.");
+        }
     }
 
     @SuppressWarnings("unchecked")
